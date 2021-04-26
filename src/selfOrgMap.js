@@ -1,17 +1,142 @@
-//CS335-02 Project 2 Sort Race - Team YZJ
+//CS335-02 Project 3 Self Organizing Map - Team YZJ
 //Authors: 
 //	Youssef Chahine	- ykchahine@csu.fullerton.edu
 //	Zach Hofmeister	- zachhof@csu.fullerton.edu
 //	Jonathan Hana	- hanaj97@csu.fullerton.edu
-//File Name: sortRace.js
-//File Description: The source code and algorithms of the sortRace program.
+//File Name: selfOrgMap.js
+//File Description: The source code and algorithms of the selfOrgMap program.
 
-var g_canvas = { cell_size:14, wid:74, hgt:48 }; // JS Global var, w canvas size info.
+var g_canvas = { cell_size:20, wid:21, hgt:21 }; // JS Global var, w canvas size info.
 var g_frame_cnt = 0; // Setup a P5 display-frame counter, to do anim
 var g_frame_mod = 8; // Update every 'mod' frames.
 var g_stop = 0; // Go by default.
 
-var inputs = ["05CA62A7BC2B6F03","065DE66B71F040BA","0684FB89C3D5754E","07C9A2D18D3E4B65","09F48E7862ED2616","1FAB3D47905FC286","286E1AD0342D7859","30E530BC4786AF21","328DE47C65C10BA9","34F2756FD18E90BA","90BA34F07E56F180","D7859286E2FD0342"];
+var cellData = [];
+
+var trainingData = [
+	[1, [5, 5, -53.5], 1],
+	[2, [5, 4, -18.8], 2],
+	[3, [5, 3, -6.9], 2],
+	[4, [5, 2, -15.6], 1],
+	[5, [5, 1, 19.3], 3],
+	[6, [5, 0, 0.0], 2],
+	[7, [5, -1, -11.3], 1],
+	[8, [5, -2, -0.4], 3],
+	[9, [5, -3, -14.1], 1],
+	[10, [5, -4, 0.8], 3],
+	[11, [5, -5, -12.5], 2],
+	[12, [4, 5, -22.0], 3],
+	[13, [4, 4, -14.2], 3],
+	[14, [4, 3, -7.8], 2],
+	[15, [4, 2, -4.6], 1],
+	[16, [4, 1, 0.6], 2],
+	[17, [4, 0, 0.0], 2],
+	[18, [4, -1, 6.8], 3],
+	[19, [4, -2, 11.2], 3],
+	[20, [4, -3, -6.6], 2],
+	[21, [4, -4, -6.4], 2],
+	[22, [4, -5, -3.0], 2],
+	[23, [3, 5, -17.5], 3],
+	[24, [3, 4, -29.8], 1],
+	[25, [3, 3, -8.1], 2],
+	[26, [3, 2, -2.2], 2],
+	[27, [3, 1, 0.1], 2],
+	[28, [3, 0, 0.0], 2],
+	[29, [3, -1, -1.3], 2],
+	[30, [3, -2, 5.3], 3],
+	[31, [3, -3, -2.7], 2],
+	[32, [3, -4, 10.5], 3],
+	[33, [3, -5, -10.5], 1],
+	[34, [2, 5, -28.0], 3],
+	[35, [2, 4, -17.6], 2],
+	[36, [2, 3, -7.8], 2],
+	[37, [2, 2, -2.4], 2],
+	[38, [2, 1, 7.8], 3],
+	[39, [2, 0, -11.0], 1],
+	[40, [2, -1, -15.6], 1],
+	[41, [2, -2, -0.8], 2],
+	[42, [2, -3, -1.4], 1],
+	[43, [2, -4, 15.8], 3],
+	[44, [2, -5, 13.0], 2],
+	[45, [1, 5, -29.5], 2],
+	[46, [1, 4, -10.6], 3],
+	[47, [1, 3, -8.9], 1],
+	[48, [1, 2, -2.2], 2],
+	[49, [1, 1, -0.3], 2],
+	[50, [1, 0, 10.0], 3],
+	[51, [1, -1, -0.1], 2],
+	[52, [1, -2, 0.6], 2],
+	[53, [1, -3, 3.3], 2],
+	[54, [1, -4, -3.7], 1],
+	[55, [1, -5, 34.5], 3],
+	[56, [0, 5, -30.0], 1],
+	[57, [0, 4, -6.8], 3],
+	[58, [0, 3, 13.6], 3],
+	[59, [0, 2, 12.4], 3],
+	[60, [0, 1, -0.2], 2],
+	[61, [0, 0, 0.0], 2],
+	[62, [0, -1, 0.2], 2],
+	[63, [0, -2, -5.4], 1],
+	[64, [0, -3, 5.4], 2],
+	[65, [0, -4, 12.8], 2],
+	[66, [0, -5, 25.0], 2],
+	[67, [-1, 5, -19.5], 2],
+	[68, [-1, 4, -23.2], 1],
+	[69, [-1, 3, -3.3], 2],
+	[70, [-1, 2, -0.6], 2],
+	[71, [-1, 1, 0.1], 2],
+	[72, [-1, 0, 9.0], 3],
+	[73, [-1, -1, -1.7], 1],
+	[74, [-1, -2, 19.2], 3],
+	[75, [-1, -3, 6.9], 2],
+	[76, [-1, -4, 15.6], 2],
+	[77, [-1, -5, 29.5], 2],
+	[78, [-2, 5, -9.0], 3],
+	[79, [-2, 4, -4.8], 2],
+	[80, [-2, 3, -16.6], 1],
+	[81, [-2, 2, 0.8], 2],
+	[82, [-2, 1, -13.4], 1],
+	[83, [-2, 0, 0.0], 2],
+	[84, [-2, -1, 0.2], 2],
+	[85, [-2, -2, -2.5], 1],
+	[86, [-2, -3, 18.8], 3],
+	[87, [-2, -4, 17.6], 2],
+	[88, [-2, -5, 25.0], 1],
+	[89, [-3, 5, -5.4], 2],
+	[90, [-3, 4, 0.4], 2],
+	[91, [-3, 3, 2.7], 2],
+	[92, [-3, 2, 6.6], 3],
+	[93, [-3, 1, 13.3], 3],
+	[94, [-3, 0, -4.0], 1],
+	[95, [-3, -1, -0.1], 2],
+	[96, [-3, -2, -13.8], 1],
+	[97, [-3, -3, 25.1], 3],
+	[98, [-3, -4, 18.8], 2],
+	[99, [-3, -5, 35.5], 2],
+	[100, [-4, 5, -2.0], 1],
+	[101, [-4, 4, 1.4], 1],
+	[102, [-4, 3, 6.6], 2],
+	[103, [-4, 2, -9.2], 1],
+	[104, [-4, 1, 2.2], 2],
+	[105, [-4, 0, -8.0], 1],
+	[106, [-4, -1, 14.4], 3],
+	[107, [-4, -2, 7.6], 3],
+	[108, [-4, -3, -4.1], 1],
+	[109, [-4, -4, 19.2], 2],
+	[110, [-4, -5, 24.0], 1],
+	[111, [-5, 5, 23.5], 3],
+	[112, [-5, 4, 13.2], 2],
+	[113, [-5, 3, 1.0], 1],
+	[114, [-5, 2, 7.4], 2],
+	[115, [-5, 1, 19.3], 3],
+	[116, [-5, 0, -18.0], 1],
+	[117, [-5, -1, 10.7], 3],
+	[118, [-5, -2, 0.6], 2],
+	[119, [-5, -3, 6.9], 2],
+	[120, [-5, -4, 18.8], 2],
+	[121, [-5, -5, 35.5], 1]
+]
+
 var g_raceObj = {index:0, currentStr:"", racing:false}
 
 var g_newStrColor = "white";
@@ -29,14 +154,31 @@ function setup() { // P5 setup function
     width = sz * g_canvas.wid;  // Our 'canvas' uses cells of given size, not 1x1 pixels.
     height = sz * g_canvas.hgt;
     createCanvas(width, height);  // Make a P5 canvas.
-	startRace();
+	populateCellData();
+	background(color(100, 100, 100));
 }
 
 function draw() { // P5 frame re-draw function, called for every frame.	
     ++g_frame_cnt;
     if (0 == g_frame_cnt % g_frame_mod) {
-        if (!g_stop && g_raceObj.racing) raceManager();
+        if (!g_stop && g_raceObj.racing) {
+
+		}
     }
+}
+
+function populateCellData() { //Give each cell random vector and class values
+	for (let x = 0; x < g_canvas.wid; ++x) {
+		cellData[x] = [];
+		for (let y = 0; y < g_canvas.hgt; ++y) {
+			let P = random(-5,5);
+			let Q = random(-5,5);
+			let R = random(-60, 60);
+			let nodeClass = int(random(1, 4)); //really 1-3, 4 not included
+			cellData[x][y] = [[P, Q, R], nodeClass];
+			// console.log(cellData[x][y]);
+		}
+	}
 }
 
 function startRace() {
@@ -84,185 +226,6 @@ function startRace() {
 	g_algoQS.sIndex = 1;
 	g_algoQS.pIndex = -1;
 	g_algoQS.partitions = [];
-}
-
-function raceManager() {
-	//Selection Sort
-	if (sorted(g_algoSS.str)) { //End of the current lap
-		drawString(g_algoSS, g_algoSS.color);
-		g_algoSS.str = rotateString(g_raceObj.currentStr, ++g_algoSS.rotation);
-		g_algoSS.unsortedIndex = 0;
-	} else if (g_algoSS.rotation < g_raceObj.currentStr.length) { //Not sorted, and race not ended
-		drawString(g_algoSS);
-		drawIterationNum(g_algoSS);
-		selecSortOnce(g_algoSS);
-	}
-	//Gold's Pore Sort
-	if (sorted(g_algoGP.str)) { //End of the current lap
-		drawString(g_algoGP, g_algoGP.color);
-		g_algoGP.str = rotateString(g_raceObj.currentStr, ++g_algoGP.rotation);
-		g_algoGP.parity = 0;
-	} else if (g_algoGP.rotation < g_raceObj.currentStr.length) { //Not sorted, and race not ended
-		drawString(g_algoGP);
-		drawIterationNum(g_algoGP);
-		goldsPoreOnce(g_algoGP);
-	}
-	//Merge Sort
-	if (sorted(g_algoMS.str)) { //End of the current lap
-		drawString(g_algoMS, g_algoMS.color);
-		g_algoMS.str = rotateString(g_raceObj.currentStr, ++g_algoMS.rotation);
-		g_algoMS.pIndex = 0;
-		g_algoMS.partitions = [];
-	} else if (g_algoMS.rotation < g_raceObj.currentStr.length) { //Not sorted, and race not ended
-		drawString(g_algoMS);
-		drawIterationNum(g_algoMS);
-		mergeSortOnce(g_algoMS);
-	}
-	//Quick Sort
-	if (sorted(g_algoQS.str)) { //End of the current lap
-		drawString(g_algoQS, g_algoQS.color);
-		g_algoQS.str = rotateString(g_raceObj.currentStr, ++g_algoQS.rotation);
-		g_algoQS.pivot = 0;
-		g_algoQS.end = 15;
-		g_algoQS.sIndex = 1;
-		g_algoQS.pIndex = -1;
-		g_algoQS.partitions = [];
-	} else if (g_algoQS.rotation < g_raceObj.currentStr.length) { //Not sorted, and race not ended
-		drawString(g_algoQS);
-		drawIterationNum(g_algoQS);
-		quickSortOnce(g_algoQS);
-	}
-}
-
-function selecSortOnce(ssObject) { //One pass for the selection sort algorithm
-	var min = ssObject.unsortedIndex; //min: index of the minimum unsorted element
-
-	//find the minimum in the unsorted area
-	for (let i = min+1; i < ssObject.str.length; ++i) {
-		if (parseInt(ssObject.str[i], 16) < parseInt(ssObject.str[min], 16)) {
-			min = i;
-		}
-	}
-
-	swap(ssObject, min, ssObject.unsortedIndex); //Swap minimum element with the first unsorted element
-	++ssObject.unsortedIndex; //Increment the index of first unsorted element.
-	++ssObject.passes;
-}
-
-function goldsPoreOnce(gpObject) { //One pass for the gold's pore sorting algorithm
-	if (!sorted(gpObject.str)) {
-		for (var i = gpObject.parity; i < gpObject.str.length; i += 2) {
-			if (i + 2 > gpObject.str.length) continue;
-			if (gpObject.str[i] > gpObject.str[i + 1]) {
-				swap(gpObject, i, i + 1);
-			}
-		}
-		
-		// Set the next half-pass to be even (0) or odd (1).
-		gpObject.parity = (gpObject.parity + 1) % 2;
-	}
-	++gpObject.passes;
-}
-
-function mergeSortOnce(msObject) { //One pass for the merge sort algorithm
-	if (!sorted(msObject.str)) {
-		if (msObject.partitions.length == 0) {
-			// Start off with single element partitions, then start merging and sorting per pass after this pass.
-			for (var i = 0; i < msObject.str.length; i++) {
-				msObject.partitions.push([msObject.str[i]]);
-			}
-		}
-		
-		var partS = ""; // To store (sorted) elements from left + right partitions into a single partition.
-		var part = [];
-		
-		for (var i = msObject.pIndex; i < msObject.partitions.length; i += 2) {
-			var mergeS = "";
-			var merge = [];
-			
-			if (i + 1 < msObject.partitions.length) {			
-				var lp = msObject.partitions[i]; // left partition
-				var rp = msObject.partitions[i + 1]; // right partition
-				
-				var a = 0;
-				var b = 0;
-				
-				while (a < lp.length && b < rp.length) {
-					if (lp[a] < rp[b])
-						{ merge.push(lp[a]); mergeS+=lp[a]; a++; }
-					else
-						{ merge.push(rp[b]); mergeS+=rp[b]; b++; }
-				}
-				
-				var r = a < lp.length ? a : b;
-				var rArr = a < lp.length ? lp : rp;
-				for (; r < rArr.length; r++) { merge.push(rArr[r]); mergeS+=rArr[r]; }
-				
-				msObject.pIndex += 2;
-			}
-			else {
-				// A partition left out w/o any other partition to merge with. Occurs when the array length is odd.
-				merge.push(msObject.partitions[i][0]);
-				mergeS += msObject.partitions[i];
-				msObject.pIndex++;
-			}
-			
-			part.push(merge);
-			partS += mergeS;
-		}
-		
-		msObject.partitions = msObject.partitions.concat(part);
-		msObject.str = partS;
-	}
-	++msObject.passes;
-}
-
-function quickSortOnce(qsObject) { //One pass for the quick sort algorithm
-	if (qsObject.str.length > 1 && !sorted(qsObject.str)) {
-		// Start after pivot, move onwards until (relative) end reached.
-		for (var i = qsObject.pivot + 1; i <= qsObject.end; i++) {
-			// If current value is <= pivot value, then swap it with the store index value and increment store index.
-			if (qsObject.str[i] <= qsObject.str[qsObject.pivot]) {
-				swap(qsObject, i, qsObject.sIndex);
-				qsObject.sIndex++;
-			}
-		}
-		// Since store index started with 1, we need to subtract 1 (in case it's out-of-bounds).
-		swap(qsObject, qsObject.pivot, qsObject.sIndex - 1);
-		
-		// Need to set pivot to new position before proceeding, prior to divide-and-conquer.
-		qsObject.pivot = qsObject.sIndex - 1;
-		
-		// Get furthest left side of 1st partition (left of pivot).
-		var p1Left = (qsObject.pIndex == -1) ? 0 : qsObject.partitions[qsObject.pIndex].start;
-		// Get furthest right side of 2nd partition (right of pivot).
-		var p2Right = (qsObject.pIndex == -1) ? 15 : qsObject.partitions[qsObject.pIndex].end;
-		
-		if (p1Left <= qsObject.pivot - 1) {
-			// Create partition to left of pivot.
-			qsObject.partitions.push({
-				start: p1Left, end: qsObject.pivot - 1
-			});
-		}
-		
-		if (p2Right >= qsObject.pivot + 1) {
-			// Create partition to right of pivot.
-			qsObject.partitions.push({
-				start: qsObject.pivot + 1, end: p2Right
-			});
-		}
-
-		// Increment partition index so that we can work on a partition that hasn't been processed yet.
-		qsObject.pIndex++;
-		
-		// If the partition index < length of partitions array, then we still need to go through unprocessed partitions.
-		if (qsObject.pIndex < qsObject.partitions.length) {		
-			qsObject.pivot = qsObject.partitions[qsObject.pIndex].start; // Pivot is always at very left side (start) of partition/main array.
-			qsObject.end = qsObject.partitions[qsObject.pIndex].end; // Self-explanatory.
-			qsObject.sIndex = qsObject.pivot + 1; // Store index is the value after the pivot.
-		}
-	}
-	++qsObject.passes;
 }
 
 function replaceChar(str, index, char) {
