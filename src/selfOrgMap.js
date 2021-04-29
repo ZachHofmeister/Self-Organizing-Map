@@ -11,11 +11,14 @@ var g_frame_cnt = 0; // Setup a P5 display-frame counter, to do anim
 var g_frame_mod = 8; // Update every 'mod' frames.
 var g_stop = 0; // Go by default.
 
-var classColors = {1:"#FF0000", 2:"#00FF00", 3:"#0000FF"}
+var g_classColors = {1:"#FF0000", 2:"#00FF00", 3:"#0000FF"} //class 1: red, class 2: green, class 3: blue
 
-var nodeData = []; //Stores data about the vector, class, and color of each cell.
+var g_nodeData = []; //Stores data about the vector, class, and color of each cell.
 
-var trainingData = [
+var g_epoch = {max:50, current:0}; //The number of epochs to run and the current epoch number
+
+var g_trainingIndex = 0;
+var g_trainingData = [ //Array of given training vectors / classes
 	[1, [5, 5, -53.5], 1],
 	[2, [5, 4, -18.8], 2],
 	[3, [5, 3, -6.9], 2],
@@ -139,6 +142,7 @@ var trainingData = [
 	[121, [-5, -5, 35.5], 1]
 ]
 
+
 function setup() { // P5 setup function
     let width = g_canvas.cell_size * g_canvas.wid;  // Our 'canvas' uses cells of given size, not 1x1 pixels.
     let height = g_canvas.cell_size * g_canvas.hgt;
@@ -150,25 +154,30 @@ function setup() { // P5 setup function
 }
 
 function draw() { // P5 frame re-draw function, called for every frame.	
-    // ++g_frame_cnt;
-    // if (0 == g_frame_cnt % g_frame_mod) {
-    //     if (!g_stop) {
-
-	// 	}
-    // }
+    ++g_frame_cnt;
+    if (0 == g_frame_cnt % g_frame_mod) {
+        if (!g_stop) {
+			if (g_trainingIndex < g_trainingData.length) { //train
+				runTraining(g_nodeData, g_trainingData[g_trainingIndex]);
+				++g_trainingIndex;
+			} else {
+				
+			}
+		}
+    }
 }
 
-function populateNodeData() { //Give each cell random vector and class values
+function populateNodeData() { // Give each cell random vector and class values
 	for (let x = 0; x < g_canvas.wid; ++x) {
-		nodeData[x] = [];
+		g_nodeData[x] = [];
 		for (let y = 0; y < g_canvas.hgt; ++y) {
 			let P = random(-5,5);
 			let Q = random(-5,5);
 			let R = random(-60, 60);
-			let nodeClass = int(random(1, 4)); //really 1-3, 4 not included
+			let nodeClass = int(random(1, 4)); // really 1-3, 4 not included
 			let nodeColor = color(100, 100, 100);
-			nodeData[x][y] = [[P, Q, R], nodeClass, nodeColor];
-			// console.log(nodeData[x][y]);
+			g_nodeData[x][y] = [[P, Q, R], nodeClass, nodeColor];
+			// console.log(g_nodeData[x][y]);
 		}
 	}
 }
@@ -182,7 +191,7 @@ function drawGridUpdate() {
 }
 
 function drawCellUpdate(x, y) {
-	let node = nodeData[x][y];
+	let node = g_nodeData[x][y];
 
 	let sz = g_canvas.cell_size;
     let rectX = x*sz; // Set x one pixel inside the sz-by-sz cell.
@@ -190,6 +199,18 @@ function drawCellUpdate(x, y) {
 
 	fill(node[2]);
 	rect(rectX, rectY, sz, sz);
+}
+
+function runTraining(nodes, trainData) { //Find and train a winning node in "nodes" based on "trainData" array
+
+}
+
+function distance(vec1, vec2) { //return the euclidian distance between two 3d vector arrays
+	return Math.sqrt(Math.pow(vec1[0] - vec2[0], 2) + Math.pow(vec1[1] - vec2[1], 2) + Math.pow(vec1[2] - vec2[2], 2));
+}
+
+function neighbors(x, y) { //return array of coordinates right, left, below, above cell
+	return [[x+1, y], [x-1, y], [x, y+1], [x, y-1]];
 }
 
 function keyPressed() {
