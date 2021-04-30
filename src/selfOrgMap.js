@@ -8,7 +8,7 @@
 
 var g_canvas = { cell_size:20, wid:21, hgt:21 }; // JS Global var, w canvas size info.
 var g_frame_cnt = 0; // Setup a P5 display-frame counter, to do anim
-var g_frame_mod = 1; // Update every 'mod' frames.
+var g_frame_mod = 5; // Update every 'mod' frames.
 var g_stop = 0; // Go by default.
 
 var g_classColors = {1:"#F", 2:"#00FF00", 3:"#0000FF"} //class 1: red, class 2: green, class 3: blue
@@ -16,11 +16,11 @@ var g_classColors = {1:"#F", 2:"#00FF00", 3:"#0000FF"} //class 1: red, class 2: 
 var g_nodeData = []; //Stores data about the vector, class, and color of each cell.
 
 var g_learningRate = 0.2; //0.2 = 20%
-var g_colorRate = 0.1; //10%
+var g_colorRate = 0.05; //5%
 
-var g_epoch = {max:50, current:0}; //The number of epochs to run and the current epoch number
+var g_epoch = {max:20, current:0}; //The number of epochs to run and the current epoch number
+
 var g_trainingIndex = 0;
-
 var g_trainingData = [ //Array of given training vectors / classes
 	[1, [5, 5, -53.5], 1],
 	[2, [5, 4, -18.8], 2],
@@ -145,7 +145,9 @@ var g_trainingData = [ //Array of given training vectors / classes
 	[121, [-5, -5, 35.5], 1]
 ]
 
-var g_testData = [
+var g_testingIndex = 0;
+var g_testingCorrect = 0;
+var g_testingData = [
 	[201, [4.5, 4.5, -27.3], 2],
 	[202, [4.5, 3.5, -12.5], 2],
 	[203, [4.5, 2.5, 6.3], 3],
@@ -361,17 +363,30 @@ function setup() { // P5 setup function
 function draw() { // P5 frame re-draw function, called for every frame.	
     ++g_frame_cnt;
     if (0 == g_frame_cnt % g_frame_mod && !g_stop) {
-		// Uncomment to run epochs automatically, currently runs once per right arrow press
         if (g_epoch.current < g_epoch.max) {
-			if (g_trainingIndex < g_trainingData.length) { //train
+			// if (g_trainingIndex < g_trainingData.length) { //train
+			// 	runTraining(g_nodeData, g_trainingData[g_trainingIndex]);
+			// 	++g_trainingIndex;
+			// } else {
+			// 	++g_epoch.current;
+			// 	g_trainingIndex = 0;
+			// }
+			// Below is for 1 epoch per frame
+			for (g_trainingIndex = 0; g_trainingIndex < g_trainingData.length; ++g_trainingIndex) {
 				runTraining(g_nodeData, g_trainingData[g_trainingIndex]);
-				++g_trainingIndex;
-			} else {
-				++g_epoch.current;
-				g_trainingIndex = 0;
 			}
+			++g_epoch.current;
+			document.getElementById("status").innerHTML = "Training";
+			document.getElementById("epoch").innerHTML = g_epoch.current + " / " + g_epoch.max;
+			document.getElementById("training").innerHTML = g_trainingIndex + " / " + g_trainingData.length;
+		} else if (g_testingIndex < g_testingData.length) { //Test it!
+			if (runTest(g_nodeData, g_testingData[g_testingIndex])) ++g_testingCorrect;
+			++g_testingIndex;
+			document.getElementById("status").innerHTML = "Testing";
+			document.getElementById("tests").innerHTML = g_testingIndex + " / " + g_testingData.length;
+			document.getElementById("testAcc").innerHTML = (g_testingCorrect / g_testingIndex * 100).toFixed(2);
 		} else {
-			console.log("Done training!")
+			document.getElementById("status").innerHTML = "<b>DONE!</b>";
 		}
     }
 }
@@ -423,7 +438,7 @@ function runTraining(nodes, trainData) { //Find and train a winning node in "nod
 			}
 		}
 	}
-	console.log("Epoch: " + g_epoch.current + " Training: " + g_trainingIndex + " Winner: " + bestNode.x + ", " + bestNode.y);
+	// console.log("Epoch: " + g_epoch.current + " Training: " + g_trainingIndex + " Winner: " + bestNode.x + ", " + bestNode.y);
 	//Adjust the best node towards train data vector and class
 	adjustToward(nodes[bestNode.x][bestNode.y], trainData[1], trainData[2]);
 	drawCellUpdate(bestNode.x, bestNode.y);
@@ -438,7 +453,6 @@ function runTraining(nodes, trainData) { //Find and train a winning node in "nod
 			let stepNeighArr = neighbors(neigh[0], neigh[1]);
 			for (let j = 0; j < stepNeighArr.length; ++j) { //For each neighbor's neighbor
 				let stepNeigh = stepNeighArr[j];
-
 				if (stepNeigh[0] >= 0 && stepNeigh[0] < nodes.length && stepNeigh[1] >= 0 && stepNeigh[1] < nodes[neigh[0]].length 
 					&& (stepNeigh[0] != bestNode.x || stepNeigh[1] != bestNode.y)) { //check neighbor in bounds and not winner
 						adjustToward(nodes[stepNeigh[0]][stepNeigh[1]], nodes[neigh[0]][neigh[1]][0], trainData[2]);
@@ -447,6 +461,23 @@ function runTraining(nodes, trainData) { //Find and train a winning node in "nod
 			}
 		}
 	}
+}
+
+function runTest(nodes, testData) {
+	let bestNode = {x:0, y:0, dist:distance(nodes[0][0][0], testData[1])}; //Start with best node at 0,0 w/ its distance
+	
+	for (let x = 0; x < nodes.length; ++x) {
+		for (let y = 0; y < nodes[x].length; ++y) {
+			newDist = distance(nodes[x][y][0], testData[1]); //Get distance between node and training coordinate
+			if (newDist < bestNode.dist) {
+				bestNode.x = x;
+				bestNode.y = y;
+				bestNode.dist = newDist;
+			}
+		}
+	}
+
+	return (nodes[bestNode.x][bestNode.y][1] == testData[2]);
 }
 
 function distance(vec1, vec2) { //return the euclidian distance between two 3d vector arrays
