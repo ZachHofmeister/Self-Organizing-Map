@@ -15,6 +15,8 @@ var g_classColors = {1:"#FF0000", 2:"#00FF00", 3:"#0000FF"} //class 1: red, clas
 
 var g_nodeData = []; //Stores data about the vector, class, and color of each cell.
 
+var g_learningRate = 0.2; //0.2 = 20%
+
 var g_epoch = {max:50, current:0}; //The number of epochs to run and the current epoch number
 var g_trainingIndex = 0;
 
@@ -157,17 +159,17 @@ function draw() { // P5 frame re-draw function, called for every frame.
     ++g_frame_cnt;
     if (0 == g_frame_cnt % g_frame_mod && !g_stop) {
 		//Uncomment to run epochs automatically, currently runs once per right arrow press
-        if (g_epoch.current < g_epoch.max) {
-			if (g_trainingIndex < g_trainingData.length) { //train
-				runTraining(g_nodeData, g_trainingData[g_trainingIndex]);
-				++g_trainingIndex;
-			} else {
-				++g_epoch.current;
-				g_trainingIndex = 0;
-			}
-		} else {
-			console.log("Done training!")
-		}
+        // if (g_epoch.current < g_epoch.max) {
+		// 	if (g_trainingIndex < g_trainingData.length) { //train
+		// 		runTraining(g_nodeData, g_trainingData[g_trainingIndex]);
+		// 		++g_trainingIndex;
+		// 	} else {
+		// 		++g_epoch.current;
+		// 		g_trainingIndex = 0;
+		// 	}
+		// } else {
+		// 	console.log("Done training!")
+		// }
     }
 }
 
@@ -219,8 +221,7 @@ function runTraining(nodes, trainData) { //Find and train a winning node in "nod
 		}
 	}
 	console.log("Epoch: " + g_epoch.current + " Training: " + g_trainingIndex + " Winner: " + bestNode.x + ", " + bestNode.y);
-	//Adjust the best node and its neighbors
-	//TODO
+	//Adjust the best node and its neighbors and draw the cell updates
 }
 
 function distance(vec1, vec2) { //return the euclidian distance between two 3d vector arrays
@@ -233,6 +234,9 @@ function neighbors(x, y) { //return array of coordinates right, left, below, abo
 
 function adjustToward(node, targetVector, targetClass) { //takes a node [array with vector, class, color] and adjusts it towards other vector and class
 	//TODO
+	//Adjustment psydocode:
+	//	newVector = currentVector + (targetVector - currentVector) * learningRate;
+	
 }
 
 function keyPressed() {
@@ -247,11 +251,11 @@ function keyPressed() {
 		// 	startRace();
 		// 	break;
 		// }
-		// case 39: { //Right Arrow THIS IS NOT INTENDED TO STAY
-		// 	for (g_trainingIndex = 0; g_trainingIndex < g_trainingData.length; ++g_trainingIndex) { //Run epoch
-		// 		runTraining(g_nodeData, g_trainingData[g_trainingIndex]);
-		// 	}
-		// 	++g_epoch.current;
-		// }
+		case 39: { //Right Arrow THIS IS NOT INTENDED TO STAY
+			for (g_trainingIndex = 0; g_trainingIndex < g_trainingData.length; ++g_trainingIndex) { //Run epoch
+				runTraining(g_nodeData, g_trainingData[g_trainingIndex]);
+			}
+			++g_epoch.current;
+		}
 	}
 }
