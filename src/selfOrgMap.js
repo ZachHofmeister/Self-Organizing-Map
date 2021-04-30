@@ -8,7 +8,7 @@
 
 var g_canvas = { cell_size:20, wid:21, hgt:21 }; // JS Global var, w canvas size info.
 var g_frame_cnt = 0; // Setup a P5 display-frame counter, to do anim
-var g_frame_mod = 5; // Update every 'mod' frames.
+var g_frame_mod = 1; // Update every 'mod' frames.
 var g_stop = 0; // Go by default.
 
 var g_classColors = {1:"#F", 2:"#00FF00", 3:"#0000FF"} //class 1: red, class 2: green, class 3: blue
@@ -364,18 +364,18 @@ function draw() { // P5 frame re-draw function, called for every frame.
     ++g_frame_cnt;
     if (0 == g_frame_cnt % g_frame_mod && !g_stop) {
         if (g_epoch.current < g_epoch.max) {
-			// if (g_trainingIndex < g_trainingData.length) { //train
-			// 	runTraining(g_nodeData, g_trainingData[g_trainingIndex]);
-			// 	++g_trainingIndex;
-			// } else {
-			// 	++g_epoch.current;
-			// 	g_trainingIndex = 0;
-			// }
-			// Below is for 1 epoch per frame
-			for (g_trainingIndex = 0; g_trainingIndex < g_trainingData.length; ++g_trainingIndex) {
+			if (g_trainingIndex < g_trainingData.length) { //train
 				runTraining(g_nodeData, g_trainingData[g_trainingIndex]);
+				++g_trainingIndex;
+			} else {
+				++g_epoch.current;
+				g_trainingIndex = 0;
 			}
-			++g_epoch.current;
+			// Below is for 1 epoch per frame
+			// for (g_trainingIndex = 0; g_trainingIndex < g_trainingData.length; ++g_trainingIndex) {
+			// 	runTraining(g_nodeData, g_trainingData[g_trainingIndex]);
+			// }
+			// ++g_epoch.current;
 			document.getElementById("status").innerHTML = "Training";
 			document.getElementById("epoch").innerHTML = g_epoch.current + " / " + g_epoch.max;
 			document.getElementById("training").innerHTML = g_trainingIndex + " / " + g_trainingData.length;
@@ -546,11 +546,11 @@ function keyPressed() {
 		// 	startRace();
 		// 	break;
 		// }
-		// case 39: { //Right Arrow THIS IS NOT INTENDED TO STAY
-		// 	for (g_trainingIndex = 0; g_trainingIndex < g_trainingData.length; ++g_trainingIndex) { //Run epoch
-		// 		runTraining(g_nodeData, g_trainingData[g_trainingIndex]);
-		// 	}
-		// 	++g_epoch.current;
-		// }
+		case 39: { //Right Arrow FAST FORWARD THE EPOCH
+			for (; g_trainingIndex < g_trainingData.length; ++g_trainingIndex) { //Run epoch
+				runTraining(g_nodeData, g_trainingData[g_trainingIndex]);
+			}
+			break;
+		}
 	}
 }
