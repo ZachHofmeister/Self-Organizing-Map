@@ -11,11 +11,12 @@ var g_frame_cnt = 0; // Setup a P5 display-frame counter, to do anim
 var g_frame_mod = 1; // Update every 'mod' frames.
 var g_stop = 0; // Go by default.
 
-var g_classColors = {1:"#FF0000", 2:"#00FF00", 3:"#0000FF"} //class 1: red, class 2: green, class 3: blue
+var g_classColors = {1:"#F", 2:"#00FF00", 3:"#0000FF"} //class 1: red, class 2: green, class 3: blue
 
 var g_nodeData = []; //Stores data about the vector, class, and color of each cell.
 
 var g_learningRate = 0.2; //0.2 = 20%
+var g_colorRate = 0.1; //10%
 
 var g_epoch = {max:50, current:0}; //The number of epochs to run and the current epoch number
 var g_trainingIndex = 0;
@@ -144,6 +145,208 @@ var g_trainingData = [ //Array of given training vectors / classes
 	[121, [-5, -5, 35.5], 1]
 ]
 
+var g_testData = [
+	[201, [4.5, 4.5, -27.3], 2],
+	[202, [4.5, 3.5, -12.5], 2],
+	[203, [4.5, 2.5, 6.3], 3],
+	[204, [4.5, 1.5, 17.3], 3],
+	[205, [4.5, 0.5, -5.2], 1],
+	[206, [4.5, -0.5, -1.2], 2],
+	[207, [4.5, -1.5, 11.6], 3],
+	[208, [4.5, -2.5, -24.6], 1],
+	[209, [4.5, -3.5, -17.5], 1],
+	[210, [4.5, -4.5, -1.1], 3],
+	[211, [3.5, 4.5, -33.9], 1],
+	[212, [3.5, 3.5, -5.9], 3],
+	[213, [3.5, 2.5, -6.4], 1],
+	[214, [3.5, 1.5, 14.6], 3],
+	[215, [3.5, 0.5, 16.4], 3],
+	[216, [3.5, -0.5, 2.2], 3],
+	[217, [3.5, -1.5, -2.7], 2],
+	[218, [3.5, -2.5, 2.7], 3],
+	[219, [3.5, -3.5, -4.3], 2],
+	[220, [3.5, -4.5, 10.5], 3],
+	[221, [2.5, 4.5, -32.5], 1],
+	[222, [2.5, 3.5, -20.5], 1],
+	[223, [2.5, 2.5, 4.3], 3],
+	[224, [2.5, 1.5, -0.9], 2],
+	[225, [2.5, 0.5, 0.2], 2],
+	[226, [2.5, -0.5, 11.6], 3],
+	[227, [2.5, -1.5, 15.6], 3],
+	[228, [2.5, -2.5, -14.6], 1],
+	[229, [2.5, -3.5, 14.3], 3],
+	[230, [2.5, -4.5, -8.7], 1],
+	[231, [1.5, 4.5, -18.3], 3],
+	[232, [1.5, 3.5, -11.5], 2],
+	[233, [1.5, 2.5, -4.4], 2],
+	[234, [1.5, 1.5, -1.0], 2],
+	[235, [1.5, 0.5, 9.0], 3],
+	[236, [1.5, -0.5, -11.2], 1],
+	[237, [1.5, -1.5, 17.7], 3],
+	[238, [1.5, -2.5, -7.3], 1],
+	[239, [1.5, -3.5, 6.1], 3],
+	[240, [1.5, -4.5, 20.1], 3],
+	[241, [0.5, 4.5, -27.1], 1],
+	[242, [0.5, 3.5, -17.7], 1],
+	[243, [0.5, 2.5, -19.7], 1],
+	[244, [0.5, 1.5, -9.9], 1],
+	[245, [0.5, 0.5, -15.0], 1],
+	[246, [0.5, -0.5, 13.0], 3],
+	[247, [0.5, -1.5, -5.6], 1],
+	[248, [0.5, -2.5, 5.4], 3],
+	[249, [0.5, -3.5, 7.3], 2],
+	[250, [0.5, -4.5, 20.1], 3],
+	[251, [-0.5, 4.5, -16.1], 2],
+	[252, [-0.5, 3.5, -21.3], 1],
+	[253, [-0.5, 2.5, 14.6], 3],
+	[254, [-0.5, 1.5, -0.4], 2],
+	[255, [-0.5, 0.5, 0.0], 2],
+	[256, [-0.5, -0.5, 11.0], 3],
+	[257, [-0.5, -1.5, 0.9], 2],
+	[258, [-0.5, -2.5, -3.3], 1],
+	[259, [-0.5, -3.5, 7.7], 1],
+	[260, [-0.5, -4.5, 20.1], 2],
+	[261, [-1.5, 4.5, -11.1], 2],
+	[262, [-1.5, 3.5, -23.1], 1],
+	[263, [-1.5, 2.5, 8.3], 3],
+	[264, [-1.5, 1.5, 14.3], 3],
+	[265, [-1.5, 0.5, 0.2], 2],
+	[266, [-1.5, -0.5, 0.0], 2],
+	[267, [-1.5, -1.5, -3.0], 1],
+	[268, [-1.5, -2.5, -5.6], 1],
+	[269, [-1.5, -3.5, 23.5], 3],
+	[270, [-1.5, -4.5, 6.3], 1],
+	[271, [-2.5, 4.5, -8.3], 1],
+	[272, [-2.5, 3.5, -6.3], 1],
+	[273, [-2.5, 2.5, 1.6], 2],
+	[274, [-2.5, 1.5, 20.4], 3],
+	[275, [-2.5, 0.5, 0.4], 2],
+	[276, [-2.5, -0.5, 7.8], 3],
+	[277, [-2.5, -1.5, 0.9], 2],
+	[278, [-2.5, -2.5, -8.3], 1],
+	[279, [-2.5, -3.5, 22.5], 3],
+	[280, [-2.5, -4.5, 17.5], 1],
+	[281, [-3.5, 4.5, -5.5], 1],
+	[282, [-3.5, 3.5, -0.7], 1],
+	[283, [-3.5, 2.5, 19.3], 3],
+	[284, [-3.5, 1.5, -16.3], 1],
+	[285, [-3.5, 0.5, 10.8], 3],
+	[286, [-3.5, -0.5, 6.6], 3],
+	[287, [-3.5, -1.5, 11.4], 3],
+	[288, [-3.5, -2.5, 4.4], 2],
+	[289, [-3.5, -3.5, 19.9], 3],
+	[290, [-3.5, -4.5, 10.9], 1],
+	[291, [-4.5, 4.5, 4.1], 1],
+	[292, [-4.5, 3.5, -4.5], 1],
+	[293, [-4.5, 2.5, -9.4], 1],
+	[294, [-4.5, 1.5, 4.4], 2],
+	[295, [-4.5, 0.5, -8.8], 1],
+	[296, [-4.5, -0.5, 6.2], 3],
+	[297, [-4.5, -1.5, 3.7], 3],
+	[298, [-4.5, -2.5, 3.7], 2],
+	[299, [-4.5, -3.5, 12.5], 2],
+	[300, [-4.5, -4.5, 41.3], 3],
+	[301, [4.3, 4.3, -9.9], 3],
+	[302, [4.3, 3.3, -10.5], 2],
+	[303, [4.3, 2.3, -2.7], 2],
+	[304, [4.3, 1.3, -15.5], 1],
+	[305, [4.3, 0.3, 0.5], 2],
+	[306, [4.3, -0.7, 12.4], 3],
+	[307, [4.3, -1.7, -4.6], 2],
+	[308, [4.3, -2.7, -7.3], 2],
+	[309, [4.3, -3.7, -8.5], 2],
+	[310, [4.3, -4.7, 10.1], 3],
+	[311, [3.3, 4.3, -23.4], 2],
+	[312, [3.3, 3.3, -7.8], 3],
+	[313, [3.3, 2.3, -3.4], 2],
+	[314, [3.3, 1.3, -13.1], 1],
+	[315, [3.3, 0.3, 0.3], 2],
+	[316, [3.3, -0.7, 14.0], 3],
+	[317, [3.3, -1.7, 2.2], 3],
+	[318, [3.3, -2.7, -21.8], 1],
+	[319, [3.3, -3.7, 10.1], 3],
+	[320, [3.3, -4.7, 1.1], 2],
+	[321, [2.3, 4.3, -22.1], 2],
+	[322, [2.3, 3.3, -10.5], 2],
+	[323, [2.3, 2.3, -6.7], 1],
+	[324, [2.3, 1.3, -17.5], 1],
+	[325, [2.3, 0.3, 0.1], 2],
+	[326, [2.3, -0.7, -0.5], 2],
+	[327, [2.3, -1.7, -8.2], 1],
+	[328, [2.3, -2.7, 7.2], 3],
+	[329, [2.3, -3.7, 18.9], 3],
+	[330, [2.3, -4.7, 12.1], 3],
+	[331, [1.3, 4.3, -20.0], 2],
+	[332, [1.3, 3.3, -9.5], 2],
+	[333, [1.3, 2.3, -3.4], 2],
+	[334, [1.3, 1.3, 5.3], 3],
+	[335, [1.3, 0.3, 0.0], 2],
+	[336, [1.3, -0.7, 13.8], 3],
+	[337, [1.3, -1.7, -0.1], 2],
+	[338, [1.3, -2.7, 1.6], 2],
+	[339, [1.3, -3.7, 5.9], 2],
+	[340, [1.3, -4.7, 14.2], 2],
+	[341, [0.3, 4.3, -21.0], 1],
+	[342, [0.3, 3.3, 8.2], 3],
+	[343, [0.3, 2.3, 10.3], 3],
+	[344, [0.3, 1.3, 4.5], 3],
+	[345, [0.3, 0.3, 0.0], 2],
+	[346, [0.3, -0.7, -17.0], 1],
+	[347, [0.3, -1.7, 0.8], 2],
+	[348, [0.3, -2.7, 3.5], 2],
+	[349, [0.3, -3.7, 9.3], 2],
+	[350, [0.3, -4.7, 3.4], 1],
+	[351, [-0.7, 4.3, -13.1], 2],
+	[352, [-0.7, 3.3, -5.5], 2],
+	[353, [-0.7, 2.3, -1.6], 2],
+	[354, [-0.7, 1.3, -10.1], 1],
+	[355, [-0.7, 0.3, 18.0], 3],
+	[356, [-0.7, -0.7, -2.9], 1],
+	[357, [-0.7, -1.7, 1.3], 2],
+	[358, [-0.7, -2.7, 20.8], 3],
+	[359, [-0.7, -3.7, 11.9], 2],
+	[360, [-0.7, -4.7, 18.6], 1],
+	[361, [-1.7, 4.3, -22.4], 1],
+	[362, [-1.7, 3.3, -2.5], 2],
+	[363, [-1.7, 2.3, 0.0], 2],
+	[364, [-1.7, 1.3, -4.5], 1],
+	[365, [-1.7, 0.3, 0.1], 2],
+	[366, [-1.7, -0.7, -9.0], 1],
+	[367, [-1.7, -1.7, 17.5], 3],
+	[368, [-1.7, -2.7, 24.6], 3],
+	[369, [-1.7, -3.7, 11.7], 1],
+	[370, [-1.7, -4.7, 7.9], 1],
+	[371, [-2.7, 4.3, 15.2], 3],
+	[372, [-2.7, 3.3, 8.1], 3],
+	[373, [-2.7, 2.3, 2.1], 2],
+	[374, [-2.7, 1.3, -7.6], 1],
+	[375, [-2.7, 0.3, 5.3], 3],
+	[376, [-2.7, -0.7, -18.2], 1],
+	[377, [-2.7, -1.7, 1.3], 2],
+	[378, [-2.7, -2.7, 11.9], 3],
+	[379, [-2.7, -3.7, 14.8], 2],
+	[380, [-2.7, -4.7, 23.3], 1],
+	[381, [-3.7, 4.3, 3.7], 2],
+	[382, [-3.7, 3.3, 5.4], 2],
+	[383, [-3.7, 2.3, 4.6], 2],
+	[384, [-3.7, 1.3, 21.6], 3],
+	[385, [-3.7, 0.3, 12.5], 3],
+	[386, [-3.7, -0.7, 1.5], 3],
+	[387, [-3.7, -1.7, 0.8], 2],
+	[388, [-3.7, -2.7, 16.6], 3],
+	[389, [-3.7, -3.7, 15.2], 2],
+	[390, [-3.7, -4.7, 30.7], 2],
+	[391, [-4.7, 4.3, 17.0], 3],
+	[392, [-4.7, 3.3, 10.3], 2],
+	[393, [-4.7, 2.3, 7.6], 2],
+	[394, [-4.7, 1.3, -8.0], 1],
+	[395, [-4.7, 0.3, -17.3], 1],
+	[396, [-4.7, -0.7, -1.0], 2],
+	[397, [-4.7, -1.7, -0.1], 2],
+	[398, [-4.7, -2.7, -4.2], 1],
+	[399, [-4.7, -3.7, 12.8], 1],
+	[400, [-4.7, -4.7, 36.1], 3]
+]
 
 function setup() { // P5 setup function
     let width = g_canvas.cell_size * g_canvas.wid;  // Our 'canvas' uses cells of given size, not 1x1 pixels.
@@ -158,18 +361,18 @@ function setup() { // P5 setup function
 function draw() { // P5 frame re-draw function, called for every frame.	
     ++g_frame_cnt;
     if (0 == g_frame_cnt % g_frame_mod && !g_stop) {
-		//Uncomment to run epochs automatically, currently runs once per right arrow press
-        // if (g_epoch.current < g_epoch.max) {
-		// 	if (g_trainingIndex < g_trainingData.length) { //train
-		// 		runTraining(g_nodeData, g_trainingData[g_trainingIndex]);
-		// 		++g_trainingIndex;
-		// 	} else {
-		// 		++g_epoch.current;
-		// 		g_trainingIndex = 0;
-		// 	}
-		// } else {
-		// 	console.log("Done training!")
-		// }
+		// Uncomment to run epochs automatically, currently runs once per right arrow press
+        if (g_epoch.current < g_epoch.max) {
+			if (g_trainingIndex < g_trainingData.length) { //train
+				runTraining(g_nodeData, g_trainingData[g_trainingIndex]);
+				++g_trainingIndex;
+			} else {
+				++g_epoch.current;
+				g_trainingIndex = 0;
+			}
+		} else {
+			console.log("Done training!")
+		}
     }
 }
 
@@ -221,7 +424,29 @@ function runTraining(nodes, trainData) { //Find and train a winning node in "nod
 		}
 	}
 	console.log("Epoch: " + g_epoch.current + " Training: " + g_trainingIndex + " Winner: " + bestNode.x + ", " + bestNode.y);
-	//Adjust the best node and its neighbors and draw the cell updates
+	//Adjust the best node towards train data vector and class
+	adjustToward(nodes[bestNode.x][bestNode.y], trainData[1], trainData[2]);
+	drawCellUpdate(bestNode.x, bestNode.y);
+	//Adjust neighbors and their neighbors
+	// console.log(neighbors(bestNode.x, bestNode.y)[0]);
+	let neighArr = neighbors(bestNode.x, bestNode.y);
+	for (let i = 0; i < neighArr.length; ++i) { //For each neighbor
+		let neigh = neighArr[i];
+		if (neigh[0] >= 0 && neigh[0] < nodes.length && neigh[1] >= 0 && neigh[1] < nodes[neigh[0]].length) { //check neighbor in bounds
+			adjustToward(nodes[neigh[0]][neigh[1]], nodes[bestNode.x][bestNode.y][0], trainData[2]);
+			drawCellUpdate(neigh[0], neigh[1]);
+			let stepNeighArr = neighbors(neigh[0], neigh[1]);
+			for (let j = 0; j < stepNeighArr.length; ++j) { //For each neighbor's neighbor
+				let stepNeigh = stepNeighArr[j];
+
+				if (stepNeigh[0] >= 0 && stepNeigh[0] < nodes.length && stepNeigh[1] >= 0 && stepNeigh[1] < nodes[neigh[0]].length 
+					&& (stepNeigh[0] != bestNode.x || stepNeigh[1] != bestNode.y)) { //check neighbor in bounds and not winner
+						adjustToward(nodes[stepNeigh[0]][stepNeigh[1]], nodes[neigh[0]][neigh[1]][0], trainData[2]);
+						drawCellUpdate(stepNeigh[0], stepNeigh[1]);
+				}
+			}
+		}
+	}
 }
 
 function distance(vec1, vec2) { //return the euclidian distance between two 3d vector arrays
@@ -233,10 +458,49 @@ function neighbors(x, y) { //return array of coordinates right, left, below, abo
 }
 
 function adjustToward(node, targetVector, targetClass) { //takes a node [array with vector, class, color] and adjusts it towards other vector and class
-	//TODO
-	//Adjustment psydocode:
-	//	newVector = currentVector + (targetVector - currentVector) * learningRate;
+	//Adjust node's vector towards target (newVector = currentVector + (targetVector - currentVector) * learningRate)
+	node[0] = addVector(node[0], mulVectorScalar(subVector(targetVector, node[0]), g_learningRate));
 	
+	//Change node's class
+	node[1] = targetClass;
+
+	//Adjust node's color based on new class
+	let r = red(node[2]), g = green(node[2]), b = blue(node[2]);
+	switch(targetClass) {
+		case 1:
+			node[2] = color(r + r * g_colorRate, g - g * g_colorRate, b - b * g_colorRate);
+			break;
+		case 2:
+			node[2] = color(r - r * g_colorRate, g + g * g_colorRate, b - b * g_colorRate);
+			break;
+		case 3:
+			node[2] = color(r - r * g_colorRate, g - g * g_colorRate, b + b * g_colorRate);
+			break;
+	}
+}
+
+function addVector(vec1, vec2) { //Adds the elements of vec1 and vec2, returns the result vector
+	let result = [];
+	for (let i = 0; i < vec1.length; ++i) {
+		result[i] = vec1[i] + vec2[i];
+	}
+	return result;
+}
+
+function subVector(vec1, vec2) { //Subtracts the elements of vec2 from vec1, returns the result vector
+	let result = [];
+	for (let i = 0; i < vec1.length; ++i) {
+		result[i] = vec2[i] - vec1[i];
+	}
+	return result;
+}
+
+function mulVectorScalar(vec, scal) { //Multiplies a vector by a scalar, returns the result vector
+	let result = [];
+	for (let i = 0; i < vec.length; ++i) {
+		result[i] = vec[i] * scal
+	}
+	return result;
 }
 
 function keyPressed() {
@@ -251,11 +515,11 @@ function keyPressed() {
 		// 	startRace();
 		// 	break;
 		// }
-		case 39: { //Right Arrow THIS IS NOT INTENDED TO STAY
-			for (g_trainingIndex = 0; g_trainingIndex < g_trainingData.length; ++g_trainingIndex) { //Run epoch
-				runTraining(g_nodeData, g_trainingData[g_trainingIndex]);
-			}
-			++g_epoch.current;
-		}
+		// case 39: { //Right Arrow THIS IS NOT INTENDED TO STAY
+		// 	for (g_trainingIndex = 0; g_trainingIndex < g_trainingData.length; ++g_trainingIndex) { //Run epoch
+		// 		runTraining(g_nodeData, g_trainingData[g_trainingIndex]);
+		// 	}
+		// 	++g_epoch.current;
+		// }
 	}
 }
