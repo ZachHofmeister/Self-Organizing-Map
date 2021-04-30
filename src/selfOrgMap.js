@@ -8,7 +8,7 @@
 
 var g_canvas = { cell_size:20, wid:21, hgt:21 }; // JS Global var, w canvas size info.
 var g_frame_cnt = 0; // Setup a P5 display-frame counter, to do anim
-var g_frame_mod = 8; // Update every 'mod' frames.
+var g_frame_mod = 1; // Update every 'mod' frames.
 var g_stop = 0; // Go by default.
 
 var g_classColors = {1:"#FF0000", 2:"#00FF00", 3:"#0000FF"} //class 1: red, class 2: green, class 3: blue
@@ -16,8 +16,8 @@ var g_classColors = {1:"#FF0000", 2:"#00FF00", 3:"#0000FF"} //class 1: red, clas
 var g_nodeData = []; //Stores data about the vector, class, and color of each cell.
 
 var g_epoch = {max:50, current:0}; //The number of epochs to run and the current epoch number
-
 var g_trainingIndex = 0;
+
 var g_trainingData = [ //Array of given training vectors / classes
 	[1, [5, 5, -53.5], 1],
 	[2, [5, 4, -18.8], 2],
@@ -155,14 +155,18 @@ function setup() { // P5 setup function
 
 function draw() { // P5 frame re-draw function, called for every frame.	
     ++g_frame_cnt;
-    if (0 == g_frame_cnt % g_frame_mod) {
-        if (!g_stop) {
+    if (0 == g_frame_cnt % g_frame_mod && !g_stop) {
+		//Uncomment to run epochs automatically, currently runs once per right arrow press
+        if (g_epoch.current < g_epoch.max) {
 			if (g_trainingIndex < g_trainingData.length) { //train
 				runTraining(g_nodeData, g_trainingData[g_trainingIndex]);
 				++g_trainingIndex;
 			} else {
-				
+				++g_epoch.current;
+				g_trainingIndex = 0;
 			}
+		} else {
+			console.log("Done training!")
 		}
     }
 }
@@ -202,7 +206,21 @@ function drawCellUpdate(x, y) {
 }
 
 function runTraining(nodes, trainData) { //Find and train a winning node in "nodes" based on "trainData" array
-
+	//Find the best / winning node
+	let bestNode = {x:0, y:0, dist:distance(nodes[0][0][0], trainData[1])}; //Start with best node at 0,0 w/ its distance
+	for (let x = 0; x < nodes.length; ++x) {
+		for (let y = 0; y < nodes[x].length; ++y) {
+			newDist = distance(nodes[x][y][0], trainData[1]); //Get distance between node and training coordinate
+			if (newDist < bestNode.dist) {
+				bestNode.x = x;
+				bestNode.y = y;
+				bestNode.dist = newDist;
+			}
+		}
+	}
+	console.log("Epoch: " + g_epoch.current + " Training: " + g_trainingIndex + " Winner: " + bestNode.x + ", " + bestNode.y);
+	//Adjust the best node and its neighbors
+	//TODO
 }
 
 function distance(vec1, vec2) { //return the euclidian distance between two 3d vector arrays
@@ -211,6 +229,10 @@ function distance(vec1, vec2) { //return the euclidian distance between two 3d v
 
 function neighbors(x, y) { //return array of coordinates right, left, below, above cell
 	return [[x+1, y], [x-1, y], [x, y+1], [x, y-1]];
+}
+
+function adjustToward(node, targetVector, targetClass) { //takes a node [array with vector, class, color] and adjusts it towards other vector and class
+	//TODO
 }
 
 function keyPressed() {
@@ -225,11 +247,11 @@ function keyPressed() {
 		// 	startRace();
 		// 	break;
 		// }
-		// case 39: { //Right Arrow
-		// 	let len = inputs.length;
-		// 	g_raceObj.index = (((g_raceObj.index + 1) % len) + len) % len; //increment race index
-		// 	startRace();
-		// 	break;
+		// case 39: { //Right Arrow THIS IS NOT INTENDED TO STAY
+		// 	for (g_trainingIndex = 0; g_trainingIndex < g_trainingData.length; ++g_trainingIndex) { //Run epoch
+		// 		runTraining(g_nodeData, g_trainingData[g_trainingIndex]);
+		// 	}
+		// 	++g_epoch.current;
 		// }
 	}
 }
